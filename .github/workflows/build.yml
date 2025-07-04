@@ -9,31 +9,26 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install system deps
-        run: |
-          sudo apt update
-          sudo apt install -y zip unzip openjdk-17-jdk python3-pip python3-setuptools git
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Android SDK + licenses
+        uses: android-actions/setup-android@v3
+        with:
+          api-levels: '30'                   # SDK platform
+          build-tools: '34.0.0'              # Build-tools version
+          cmdline-tools: 'latest'            # To make sdkmanager available
+          accept-android-sdk-licenses: true
 
       - name: Install Buildozer
-        run: pip install --upgrade pip && pip install buildozer cython virtualenv
-
-      - name: Prebuild (init SDK)
-        run: buildozer android debug || true
-
-      - name: Fix sdkmanager path (if needed)
         run: |
-          SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
-          TARGET="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          DEST="$SDK_ROOT/tools/bin/sdkmanager"
-          if [ -x "$TARGET" ] && [ ! -e "$DEST" ]; then
-            mkdir -p "$(dirname "$DEST")"
-            ln -s "$TARGET" "$DEST"
-          fi
+          pip install --upgrade pip
+          pip install buildozer cython virtualenv
 
-      - name: Accept Android SDK Licenses
-        run: yes | "$HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager" --licenses
-
-      - name: Final Build APK
+      - name: Build APK
         run: buildozer android debug
 
       - name: Upload APK
