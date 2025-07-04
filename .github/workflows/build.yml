@@ -8,8 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -17,22 +16,22 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set up Android SDK + accept licenses
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
           api-levels: '30'
           cmdline-tools: latest
-          accept-android-sdk-licenses: true
+          accept-android-sdk-licenses: false  # we handle it manually
 
-      - name: Install Android Build Tools 34.0.0 (for AIDL)
-        run: sdkmanager "build-tools;34.0.0"
-
-      - name: Confirm AIDL Exists
+      - name: Accept Android SDK Licenses (manually)
         run: |
-          if [ ! -f "$ANDROID_SDK_ROOT/build-tools/34.0.0/aidl" ]; then
-            echo "AIDL still missing — something went wrong."
-            exit 1
-          fi
+          mkdir -p "$ANDROID_SDK_ROOT/licenses"
+          echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_SDK_ROOT/licenses/android-sdk-license"
+
+      - name: Install Android Build Tools 34.0.0 (includes AIDL)
+        run: |
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0"
+          ls "$ANDROID_SDK_ROOT/build-tools/34.0.0/aidl" || (echo "❌ AIDL still missing. Build-tools failed." && exit 1)
 
       - name: Install Buildozer
         run: |
