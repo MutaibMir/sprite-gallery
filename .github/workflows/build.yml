@@ -20,11 +20,14 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython virtualenv
 
+      - name: Accept Android SDK Licenses
+        run: yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+
       - name: Build APK
         run: buildozer android debug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4  # 🔧 Fixed version
+        uses: actions/upload-artifact@v4
         with:
           name: sprite-viewer.apk
           path: bin/*.apk
