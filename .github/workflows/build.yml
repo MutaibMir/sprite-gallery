@@ -20,11 +20,15 @@ jobs:
       - name: Prebuild (init SDK)
         run: buildozer android debug || true
 
-      - name: Fix sdkmanager path
+      - name: Fix sdkmanager path (if needed)
         run: |
           SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
-          mkdir -p "$SDK_ROOT/tools/bin"
-          ln -s "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "$SDK_ROOT/tools/bin/sdkmanager"
+          TARGET="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          DEST="$SDK_ROOT/tools/bin/sdkmanager"
+          if [ -x "$TARGET" ] && [ ! -e "$DEST" ]; then
+            mkdir -p "$(dirname "$DEST")"
+            ln -s "$TARGET" "$DEST"
+          fi
 
       - name: Accept Android SDK Licenses
         run: yes | "$HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager" --licenses
