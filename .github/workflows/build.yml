@@ -26,7 +26,7 @@ jobs:
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip \
             libffi-dev libssl-dev libjpeg-dev libfreetype6-dev \
             libncurses5-dev libtool pkg-config zlib1g-dev \
-            autoconf automake cython3
+            autoconf automake cython3 build-essential libstdc++6 aidl
           wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
           sudo apt install ./libtinfo5_6.3-2ubuntu0.1_amd64.deb
           sudo ln -sf "$(which cython3)" /usr/local/bin/cython
@@ -39,11 +39,9 @@ jobs:
           unzip -q cmdline-tools.zip -d "$HOME/android-sdk/cmdline-tools/"
           rm cmdline-tools.zip
 
-          # Inject known license hashes
           printf "8933bad161af4178b1185d1a37fbf41ea5269c55\n24333f8a63b6825ea9c5514f83c2829b004d1fee\n" \
             > "$HOME/android-sdk/licenses/android-sdk-license"
 
-          # Install all SDK components
           yes | "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
             --sdk_root="$HOME/android-sdk" \
             "platform-tools" \
@@ -55,6 +53,16 @@ jobs:
         run: |
           yes | "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
           --sdk_root="$HOME/android-sdk" --licenses
+
+      - name: Manually copy system AIDL into build-tools folder
+        run: |
+          mkdir -p "$HOME/.buildozer/android/platform/android-sdk/build-tools/36.0.0"
+          if command -v aidl >/dev/null; then
+            cp "$(which aidl)" "$HOME/.buildozer/android/platform/android-sdk/build-tools/36.0.0/aidl"
+            chmod +x "$HOME/.buildozer/android/platform/android-sdk/build-tools/36.0.0/aidl"
+          else
+            echo "AIDL not found, build will likely fail"
+          fi
 
       - name: Install Buildozer & Cython
         run: |
@@ -72,5 +80,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: buildozer-log
-          path: |
-            ./.buildozer/android/platform
+          path: ./.buildozer/android/platform
