@@ -9,7 +9,7 @@ orientation = portrait
 fullscreen = 0
 log_level = 2
 main.py = main.py
-requirements = python3,kivy,pillow
+requirements = python3,kivy,pillow,cython==0.29.33
 android.permissions = MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
 android.extra_manifest_entries = <application android:requestLegacyExternalStorage="true"/>
 android.api = 33
