@@ -1,6 +1,6 @@
 [app]
-title = SpriteApp
-package.name = spriteapp
+title = Sprite Gallery
+package.name = spritegallery
 package.domain = org.kivy
 source.dir = .
 source.include_exts = py,png,jpg,kv,json
@@ -11,7 +11,7 @@ log_level = 2
 main.py = main.py
 requirements = python3,kivy==2.3.0,pillow,cython==0.29.33,https://github.com/kivy/pyjnius/archive/master.zip
 icon.filename = %(source.dir)s/icon.png
-presplash.filename = %(source.dir)s/presplash.png
+# presplash.filename = %(source.dir)s/presplash.png  # Removed (was crashing)
 android.permissions = MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
 android.extra_manifest_entries = <application android:requestLegacyExternalStorage="true"/>
 android.api = 33
