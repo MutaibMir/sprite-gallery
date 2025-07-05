@@ -69,9 +69,10 @@ jobs:
           pip install --upgrade pip setuptools wheel
           pip install buildozer cython==0.29.33
 
-      - name: Build APK (verbose)
+      - name: Build APK (force correct SDK/NDK path)
         env:
           ANDROIDSDK: $HOME/android-sdk
+          ANDROIDNDK: $HOME/.buildozer/android/platform/android-ndk-r23b
         run: |
           buildozer --verbose android debug
 
