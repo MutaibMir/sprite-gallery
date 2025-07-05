@@ -80,9 +80,12 @@ jobs:
         run: |
           buildozer --verbose android debug
 
-      - name: Upload logs on failure
+      - name: Upload Build Logs on Failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: buildozer-log
-          path: ./.buildozer/android/platform
+          path: |
+            ./.buildozer/android/platform/**
+            ./.buildozer/android/**
+            ./.buildozer/**
