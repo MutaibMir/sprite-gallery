@@ -20,7 +20,7 @@ jobs:
           path: ~/.buildozer ~/.buildozer_global
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
-      - name: Install system dependencies (Ubuntu 24.04 fix + cython3)
+      - name: Install system dependencies (Ubuntu 24.04 fixes)
         run: |
           sudo apt update
           sudo apt install -y \
@@ -28,11 +28,8 @@ jobs:
             libjpeg-dev libfreetype6-dev libncurses5-dev libtool pkg-config \
             cmake zlib1g-dev autoconf automake cython3
 
-          # Fix for Ubuntu 24.04 missing libtinfo5
           wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
           sudo apt install ./libtinfo5_6.3-2ubuntu0.1_amd64.deb
-
-          # Buildozer expects `cython`, not `cython3`
           sudo ln -sf "$(which cython3)" /usr/local/bin/cython
 
       - name: Install Android SDK & NDK
@@ -41,7 +38,6 @@ jobs:
           curl -sSf https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -o cmdline-tools.zip
           unzip -q cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools/
           rm cmdline-tools.zip
-
           yes | $HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk \
             "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;23.1.7779620"
 
@@ -57,7 +53,7 @@ jobs:
       - name: Build APK (verbose)
         run: buildozer --verbose android debug
 
-      - name: Upload Buildozer Logs (on failure)
+      - name: Upload Buildozer logs (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
