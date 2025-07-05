@@ -51,10 +51,13 @@ jobs:
       - name: Build APK with Buildozer
         run: |
           export ANDROIDSDK="$HOME/android-sdk"
-          yes | buildozer android debug
+          yes | buildozer -v android debug
+
+      - name: List APK output (debug)
+        run: ls -lh bin/ || echo "No APK found"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: spriteapp-debug-apk
+          name: spritegallery-debug-apk
           path: bin/*.apk
