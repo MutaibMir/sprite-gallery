@@ -8,51 +8,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
           distribution: 'temurin'
+          java-version: '17'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
           cmdline-tools-version: latest
           accept-android-sdk-licenses: true
-          packages: |
+          packages: >
             build-tools;34.0.0
             platforms;android-30
             platform-tools
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install Buildozer and deps
+      - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip unzip libncurses5 libstdc++6
+          sudo apt-get install -y zip unzip libncurses5
           pip install --upgrade pip
           pip install buildozer cython virtualenv
 
-      - name: Build APK and capture logs
+      - name: Build APK
         run: |
           mkdir -p logs
-          buildozer android debug > logs/build.log 2>&1 || true
+          buildozer android debug | tee logs/build.log
 
-      - name: Upload Buildozer Logs
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sprite-viewer-apk
+          path: bin/*.apk
+
+      - name: Upload Build Logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: buildozer-logs
+          name: build-logs
           path: logs/build.log
-
-      - name: Upload APK
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: sprite-viewer.apk
-          path: bin/*.apk
