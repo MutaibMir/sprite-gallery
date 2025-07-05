@@ -1,66 +1,58 @@
 name: Build APK
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Set up Java
-        uses: actions/setup-java@v3
+      - name: Cache Buildozer directories
+        uses: actions/cache@v3
         with:
-          distribution: 'temurin'
-          java-version: 17
+          path:
+            - ~/.buildozer
+            - ~/.buildozer_global
+          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y unzip zip libncurses6 libstdc++6
-          pip install --upgrade pip
-          pip install buildozer cython virtualenv
+          sudo apt update
+          sudo apt-get install -y \
+            git zip unzip openjdk-17-jdk python3-pip libffi-dev libssl-dev \
+            libjpeg-dev libfreetype6-dev libncurses5-dev libtinfo5 libtool \
+            pkg-config cmake zlib1g-dev autoconf automake
 
-      - name: Install Android cmdline-tools manually
+      - name: Install Android SDK & NDK
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
-          cd $HOME/android-sdk/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-          unzip commandlinetools-linux-*.zip -d latest
-          rm commandlinetools-linux-*.zip
+          curl -sSf https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -o cmdline-tools.zip
+          unzip -q cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools/
+          rm cmdline-tools.zip
+          yes | $HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk \
+            "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;23.1.7779620"
 
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+      - name: Accept SDK licenses
+        run: yes | $HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
 
-      - name: Accept licenses and install SDK packages
+      - name: Setup Buildozer
+        env:
+          ANDROIDSDK: $HOME/android-sdk
+          ANDROIDNDK: $HOME/android-sdk/ndk/23.1.7779620
         run: |
-          yes | sdkmanager --licenses
-          sdkmanager "build-tools;34.0.0" "platforms;android-30" "platform-tools"
-
-      - name: Set buildozer env vars
-        run: |
-          echo "ANDROIDSDK=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "ANDROIDNDK=$HOME/.buildozer/android/platform/android-ndk-r25b" >> $GITHUB_ENV
-          echo "ANDROIDAPI=30" >> $GITHUB_ENV
-          echo "ANDROIDMINAPI=21" >> $GITHUB_ENV
+          pip install --upgrade pip buildozer
 
       - name: Build APK
         run: buildozer android debug
 
-      - name: Upload APK
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: SpriteViewer.apk
+          name: spriteapp-debug.apk
           path: bin/*.apk
-
-      - name: Upload Build Logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs
-          path: .buildozer/android/platform/**/build/outputs/**/*.log
