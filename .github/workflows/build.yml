@@ -8,46 +8,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v3
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: latest
-          accept-android-sdk-licenses: true
-          packages: >
-            build-tools;34.0.0
-            platforms;android-30
-            platform-tools
 
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip unzip libncurses5
+          sudo apt-get install -y zip unzip libncurses6
           pip install --upgrade pip
           pip install buildozer cython virtualenv
 
-      - name: Build APK
+      - name: Set up Environment Variables
         run: |
-          mkdir -p logs
-          buildozer android debug | tee logs/build.log
+          echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
+          echo "ANDROIDSDK=$HOME/.buildozer/android/platform/android-sdk" >> $GITHUB_ENV
+          echo "ANDROIDNDK=$HOME/.buildozer/android/platform/android-ndk-r25b" >> $GITHUB_ENV
+          echo "ANDROIDAPI=30" >> $GITHUB_ENV
+          echo "ANDROIDMINAPI=21" >> $GITHUB_ENV
+
+      - name: Run Buildozer
+        run: |
+          buildozer android debug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: sprite-viewer-apk
+          name: SpriteViewer.apk
           path: bin/*.apk
 
-      - name: Upload Build Logs
+      - name: Upload Build Log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: build-logs
-          path: logs/build.log
+          name: build-log
+          path: .buildozer/android/platform/build-armeabi-v7a/build/outputs/logs/*
