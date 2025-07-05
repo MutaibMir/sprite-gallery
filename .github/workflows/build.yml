@@ -39,6 +39,12 @@ jobs:
           mkdir -p ~/.buildozer/android/platform/
           ln -sfn /usr/local/lib/android/sdk ~/.buildozer/android/platform/android-sdk
 
+      - name: Symlink sdkmanager where Buildozer expects it
+        run: |
+          mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
+          ln -sfn /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager \
+                  ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+
       - name: Install Buildozer & Cython
         run: |
           pip install --upgrade pip
