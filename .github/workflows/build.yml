@@ -31,24 +31,28 @@ jobs:
           sudo apt install ./libtinfo5_6.3-2ubuntu0.1_amd64.deb
           sudo ln -sf "$(which cython3)" /usr/local/bin/cython
 
-      - name: Install Android SDK & NDK with Build Tools 35
+      - name: Install Android SDK + Inject licenses for build-tools 36
         run: |
-          mkdir -p "$HOME/android-sdk/cmdline-tools"
-          curl -sSf https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip \
-            -o cmdline-tools.zip
+          mkdir -p "$HOME/android-sdk/cmdline-tools" "$HOME/android-sdk/licenses"
+          curl -sSf https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -o cmdline-tools.zip
           unzip -q cmdline-tools.zip -d "$HOME/android-sdk/cmdline-tools/"
           rm cmdline-tools.zip
+
+          # Inject license hashes so sdkmanager won’t block on build-tools 36 license
+          printf "8933bad161af4178b1185d1a37fbf41ea5269c55\n24333f8a63b6825ea9c5514f83c2829b004d1fee\n" \
+            > "$HOME/android-sdk/licenses/android-sdk-license"
+
+          # Install required packages
           yes | "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
             --sdk_root="$HOME/android-sdk" \
             "platform-tools" \
             "platforms;android-33" \
-            "build-tools;35.0.1" \
+            "build-tools;36.0.0" \
             "ndk;23.1.7779620"
 
-      - name: Accept all SDK licenses
-        run: |
-          yes | "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
-            --sdk_root="$HOME/android-sdk" --licenses
+      - name: Accept remaining licenses
+        run: yes | "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
+          --sdk_root="$HOME/android-sdk" --licenses
 
       - name: Install Buildozer & Cython
         run: |
@@ -58,8 +62,7 @@ jobs:
       - name: Build APK (verbose)
         env:
           ANDROIDSDK: $HOME/android-sdk
-        run: |
-          buildozer --verbose android debug
+        run: buildozer --verbose android debug
 
       - name: Upload logs on failure
         if: failure()
