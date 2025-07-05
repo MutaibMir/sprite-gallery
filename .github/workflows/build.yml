@@ -30,10 +30,9 @@ jobs:
 
       - name: Manually install Apache ANT
         run: |
-          mkdir -p ~/.buildozer/android/platform/apache-ant-1.9.4
+          mkdir -p ~/.buildozer/android/platform/
           wget -q https://archive.apache.org/dist/ant/binaries/apache-ant-1.9.4-bin.tar.gz
           tar -xzf apache-ant-1.9.4-bin.tar.gz -C ~/.buildozer/android/platform/
-          mv ~/.buildozer/android/platform/apache-ant-1.9.4-bin ~/.buildozer/android/platform/apache-ant-1.9.4
 
       - name: Link Android SDK to Buildozer path
         run: |
