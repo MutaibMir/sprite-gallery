@@ -16,9 +16,7 @@ jobs:
       - name: Cache Buildozer directories
         uses: actions/cache@v3
         with:
-          path:
-            - ~/.buildozer
-            - ~/.buildozer_global
+          path: ~/.buildozer ~/.buildozer_global
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
       - name: Install system dependencies
@@ -42,11 +40,7 @@ jobs:
         run: yes | $HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
 
       - name: Setup Buildozer
-        env:
-          ANDROIDSDK: $HOME/android-sdk
-          ANDROIDNDK: $HOME/android-sdk/ndk/23.1.7779620
-        run: |
-          pip install --upgrade pip buildozer
+        run: pip install --upgrade pip buildozer
 
       - name: Build APK
         run: buildozer android debug
