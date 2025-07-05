@@ -54,22 +54,26 @@ jobs:
           yes | "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
           --sdk_root="$HOME/android-sdk" --licenses
 
-      - name: Manually copy system AIDL into build-tools folder
+      - name: Manual AIDL fix
         run: |
           mkdir -p "$HOME/.buildozer/android/platform/android-sdk/build-tools/36.0.0"
           if command -v aidl >/dev/null; then
             cp "$(which aidl)" "$HOME/.buildozer/android/platform/android-sdk/build-tools/36.0.0/aidl"
             chmod +x "$HOME/.buildozer/android/platform/android-sdk/build-tools/36.0.0/aidl"
-          else
-            echo "AIDL not found, build will likely fail"
           fi
+
+      - name: Symlink sdkmanager to expected location
+        run: |
+          mkdir -p "$HOME/.buildozer/android/platform/android-sdk/tools/bin"
+          ln -sf "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
+                 "$HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager"
 
       - name: Install Buildozer & Cython
         run: |
           pip install --upgrade pip setuptools wheel
           pip install buildozer cython==0.29.33
 
-      - name: Build APK (force correct SDK/NDK path)
+      - name: Build APK
         env:
           ANDROIDSDK: $HOME/android-sdk
           ANDROIDNDK: $HOME/.buildozer/android/platform/android-ndk-r23b
