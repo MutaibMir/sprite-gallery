@@ -10,33 +10,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Add focal repo to fix libncurses5 and aidl issues
+      - name: Install system packages + add focal repo for ncurses
         run: |
           echo "deb http://security.ubuntu.com/ubuntu focal-security main universe" | sudo tee /etc/apt/sources.list.d/focal-security.list
           sudo apt update
-          sudo apt install -y libncurses5 libtinfo5
-
-      - name: Install system dependencies for Buildozer
-        run: |
           sudo apt install -y \
-            zip unzip git build-essential \
-            openjdk-17-jdk python3-pip python3-setuptools \
-            libffi-dev libssl-dev \
-            libsqlite3-dev libbz2-dev libreadline-dev zlib1g-dev \
-            cmake adb wget
+            openjdk-17-jdk unzip zip git cmake \
+            python3-pip build-essential libffi-dev libssl-dev \
+            libsqlite3-dev zlib1g-dev libncurses5 libtinfo5
 
-      - name: Install Python dependencies
+      - name: Install Android SDK build-tools 36.0.0
+        run: |
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+          mkdir -p "$ANDROID_HOME/cmdline-tools"
+          cd "$ANDROID_HOME/cmdline-tools"
+          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline.zip
+          unzip cmdline.zip
+          mv cmdline-tools latest
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "platform-tools" \
+            "platforms;android-33" \
+            "build-tools;36.0.0"
+
+      - name: Set JAVA_HOME
+        run: |
+          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+          echo "$JAVA_HOME/bin" >> $GITHUB_PATH
+
+      - name: Install Python + Buildozer deps
         run: |
           pip install --upgrade pip
           pip install buildozer cython==0.29.33 pillow kivy
 
       - name: Build APK with Buildozer
-        run: buildozer android debug --verbose
+        run: |
+          export ANDROIDSDK="$HOME/android-sdk"
+          yes | buildozer android debug
 
-      - name: Upload built APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: spriteapp-debug-apk
