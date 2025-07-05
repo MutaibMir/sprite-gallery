@@ -1,36 +1,28 @@
 [app]
-title = Sprite Viewer
-package.name = spriteviewer
+title = SpriteApp
+package.name = spriteapp
 package.domain = org.kivy
 source.dir = .
 source.include_exts = py,png,jpg,kv,json
 version = 1.0
-
-requirements = python3,kivy,pillow
-
 orientation = portrait
-fullscreen = 1
-
-# Custom app icon
-icon.filename = icon.png
-
-# Permissions to access external storage
-android.permissions = READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
-
-# Target a stable, working version of Android build tools
-android.build_tools_version = 34.0.0
-android.api = 30
+fullscreen = 0
+log_level = 2
+main.py = main.py
+requirements = python3,kivy,pillow
+android.permissions = READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
+android.api = 33
 android.minapi = 21
-android.target = 30
-
-# Keep screen on
-android.keep_active = 1
+android.ndk = 23b
+android.arch = arm64-v8a
+android.allow_backup = True
+android.hide_statusbar = False
+icon.filename = %(source.dir)s/icon.png
+presplash.filename = %(source.dir)s/presplash.png
+android.strip = False
 
 [buildozer]
 log_level = 2
 warn_on_root = 0
 android.accept_sdk_license = True
 android.skip_update = False
-
-# Fix ANT download failure on CI
-android.ant_path = /home/runner/.buildozer/android/platform/apache-ant-1.9.4
