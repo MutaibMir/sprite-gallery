@@ -21,7 +21,8 @@ jobs:
             openjdk-17-jdk unzip zip git cmake \
             python3-pip build-essential libffi-dev libssl-dev \
             libsqlite3-dev zlib1g-dev libncurses5 libtinfo5 \
-            libtool automake autoconf m4
+            libtool automake autoconf m4 \
+            pkg-config libltdl-dev
 
       - name: Install Android SDK build-tools 36.0.0
         run: |
