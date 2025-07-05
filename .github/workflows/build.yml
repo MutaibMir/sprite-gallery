@@ -28,18 +28,18 @@ jobs:
           accept-android-sdk-licenses: true
           packages: build-tools;34.0.0 platforms;android-30 platform-tools
 
-      - name: Manually install Apache ANT
+      - name: Install Apache ANT
         run: |
           mkdir -p ~/.buildozer/android/platform/
           wget -q https://archive.apache.org/dist/ant/binaries/apache-ant-1.9.4-bin.tar.gz
           tar -xzf apache-ant-1.9.4-bin.tar.gz -C ~/.buildozer/android/platform/
 
-      - name: Link Android SDK to Buildozer path
+      - name: Link Android SDK for Buildozer
         run: |
           mkdir -p ~/.buildozer/android/platform/
           ln -sfn /usr/local/lib/android/sdk ~/.buildozer/android/platform/android-sdk
 
-      - name: Symlink sdkmanager where Buildozer expects it
+      - name: Symlink sdkmanager
         run: |
           mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
           ln -sfn /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager \
@@ -50,7 +50,7 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython virtualenv
 
-      - name: Clean old build artifacts
+      - name: Clean old builds
         run: |
           rm -rf .buildozer bin
 
@@ -62,3 +62,9 @@ jobs:
         with:
           name: sprite-viewer.apk
           path: bin/*.apk
+
+      - name: Upload Buildozer Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: buildozer-logs
+          path: .buildozer/android/platform/build-armeabi-v7a/build/**/build.log
