@@ -16,7 +16,7 @@ android.permissions = MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,WRITE_EXTERN
 android.extra_manifest_entries = <application android:requestLegacyExternalStorage="true"/>
 android.api = 33
 android.minapi = 21
-android.ndk = 23b
+android.ndk = 25b
 android.build_tools_version = 36.0.0
 android.archs = arm64-v8a
 android.allow_backup = True
