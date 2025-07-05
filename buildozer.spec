@@ -29,3 +29,5 @@ android.keep_active = 1
 [buildozer]
 log_level = 2
 warn_on_root = 0
+android.accept_sdk_license = True
+android.skip_update = False
