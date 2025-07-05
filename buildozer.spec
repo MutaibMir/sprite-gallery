@@ -10,11 +10,13 @@ fullscreen = 0
 log_level = 2
 main.py = main.py
 requirements = python3,kivy,pillow
-android.permissions = READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
+android.permissions = MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
+android.extra_manifest_entries = <application android:requestLegacyExternalStorage="true"/>
 android.api = 33
 android.minapi = 21
 android.ndk = 23b
-android.arch = arm64-v8a
+android.build_tools_version = 33.0.2
+android.archs = arm64-v8a
 android.allow_backup = True
 android.hide_statusbar = False
 icon.filename = %(source.dir)s/icon.png
