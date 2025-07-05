@@ -1,78 +1,42 @@
-name: Build Sprite Library
+name: Build APK
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.10
+          python-version: '3.10'
 
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            zip unzip openjdk-17-jdk \
-            python3-pip python3-setuptools git \
-            libncurses5 libffi-dev \
-            libssl-dev libsqlite3-dev \
-            zlib1g-dev libjpeg-dev libfreetype6-dev
+          sudo apt update
+          sudo apt install -y \
+            zip unzip git build-essential \
+            libncurses5 openjdk-17-jdk \
+            python3-pip python3-setuptools \
+            libffi-dev libssl-dev \
+            libsqlite3-dev libbz2-dev libreadline-dev zlib1g-dev \
+            adb wget
 
-      - name: Install Android SDK command-line tools
-        run: |
-          mkdir -p $HOME/android-sdk/cmdline-tools/latest
-          cd $HOME/android-sdk/cmdline-tools
-          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-          unzip sdk-tools.zip -d latest
-          rm sdk-tools.zip
-
-      - name: Accept licenses and install SDK components
-        run: |
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
-            "platform-tools" "platforms;android-33" "build-tools;36.0.0" "ndk;25.2.9519653"
-
-      - name: Set environment variables
-        run: |
-          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-          echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
-          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
-
-      - name: Install Buildozer
-        run: |
           pip install --upgrade pip
-          pip install cython==0.29.33 buildozer
-
-      - name: Debug SDK structure
-        run: |
-          echo "Listing Android SDK layout:"
-          find $HOME/android-sdk
+          pip install buildozer cython==0.29.33 pillow kivy
 
       - name: Build APK
-        run: buildozer android debug
-
-      - name: Upload Build Logs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs
-          path: .buildozer/android/platform/**/build/outputs/**/*.log
+        run: |
+          buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: sprite-library-apk
+          name: spriteapp-debug-apk
           path: bin/*.apk
