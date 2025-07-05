@@ -8,34 +8,35 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
+      - name: Add focal repo to fix libncurses5 and aidl issues
         run: |
+          echo "deb http://security.ubuntu.com/ubuntu focal-security main universe" | sudo tee /etc/apt/sources.list.d/focal-security.list
           sudo apt update
+          sudo apt install -y libncurses5 libtinfo5
+
+      - name: Install system dependencies for Buildozer
+        run: |
           sudo apt install -y \
             zip unzip git build-essential \
-            libncurses5 openjdk-17-jdk \
-            python3-pip python3-setuptools \
+            openjdk-17-jdk python3-pip python3-setuptools \
             libffi-dev libssl-dev \
             libsqlite3-dev libbz2-dev libreadline-dev zlib1g-dev \
-            adb wget
+            cmake adb wget
 
+      - name: Install Python dependencies
+        run: |
           pip install --upgrade pip
           pip install buildozer cython==0.29.33 pillow kivy
 
-      - name: Build APK
-        run: |
-          buildozer android debug
+      - name: Build APK with Buildozer
+        run: buildozer android debug --verbose
 
-      - name: Upload APK
+      - name: Upload built APK
         uses: actions/upload-artifact@v4
         with:
           name: spriteapp-debug-apk
