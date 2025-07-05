@@ -2,55 +2,53 @@ name: Build APK
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install buildozer cython pillow
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --user buildozer Cython
 
-    - name: Install Android SDK command line tools
-      run: |
-        mkdir -p $HOME/android-sdk/cmdline-tools
-        cd $HOME/android-sdk/cmdline-tools
-        curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-        unzip sdk-tools.zip
-        mv cmdline-tools latest
-        mkdir cmdline-tools
-        mv latest cmdline-tools/
-        yes | $HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
-        yes | $HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk \
-          "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+      - name: Install Android SDK cmdline-tools
+        run: |
+          mkdir -p $HOME/android-sdk/cmdline-tools/latest
+          cd $HOME/android-sdk/cmdline-tools/latest
+          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip sdk-tools.zip
+          rm sdk-tools.zip
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
+            "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
-    - name: Fix build-tools path for Buildozer
-      run: |
-        BUILD_TOOLS_VER=33.0.2
-        SOURCE="$HOME/android-sdk/build-tools/$BUILD_TOOLS_VER"
-        TARGET="$HOME/.buildozer/android/platform/android-sdk/build-tools/$BUILD_TOOLS_VER"
-        mkdir -p "$TARGET"
-        cp -r "$SOURCE"/* "$TARGET"/
+      - name: Set environment variables
+        run: |
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
 
-    - name: Build with Buildozer
-      run: |
-        buildozer --version
-        buildozer android debug
+      - name: Initialize Buildozer
+        run: |
+          buildozer init || true
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: sprite-gallery-apk
-        path: bin/*.apk
+      - name: Build APK
+        run: |
+          buildozer --verbose android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug.apk
+          path: bin/*.apk
