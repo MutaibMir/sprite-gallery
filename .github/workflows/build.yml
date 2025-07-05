@@ -17,7 +17,9 @@ jobs:
       - name: Cache Buildozer dirs
         uses: actions/cache@v3
         with:
-          path: ~/.buildozer ~/.buildozer_global
+          path: |
+            ~/.buildozer
+            ~/.buildozer_global
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
       - name: Install system dependencies
@@ -60,11 +62,12 @@ jobs:
             chmod +x "$HOME/.buildozer/android/platform/android-sdk/build-tools/36.0.0/aidl"
           fi
 
-      - name: Copy sdkmanager for Buildozer compatibility
+      - name: Copy sdkmanager binary to legacy tools path
         run: |
-          mkdir -p "$HOME/.buildozer/android/platform/android-sdk/tools"
-          cp -r "$HOME/android-sdk/cmdline-tools/cmdline-tools" \
-                "$HOME/.buildozer/android/platform/android-sdk/tools"
+          mkdir -p "$HOME/.buildozer/android/platform/android-sdk/tools/bin"
+          cp "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
+             "$HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager"
+          chmod +x "$HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager"
 
       - name: Install Buildozer & Cython
         run: |
@@ -75,8 +78,7 @@ jobs:
         env:
           ANDROIDSDK: $HOME/android-sdk
           ANDROIDNDK: $HOME/.buildozer/android/platform/android-ndk-r23b
-        run: |
-          buildozer --verbose android debug
+        run: buildozer --verbose android debug
 
       - name: Upload Build Logs on Failure
         if: failure()
