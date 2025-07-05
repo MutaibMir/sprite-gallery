@@ -31,7 +31,7 @@ jobs:
           sudo apt install ./libtinfo5_6.3-2ubuntu0.1_amd64.deb
           sudo ln -sf "$(which cython3)" /usr/local/bin/cython
 
-      - name: Install Android SDK + Inject licenses
+      - name: Install Android SDK + Accept licenses
         run: |
           mkdir -p "$HOME/android-sdk/cmdline-tools" "$HOME/android-sdk/licenses"
           curl -sSf https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip \
@@ -49,8 +49,6 @@ jobs:
             "build-tools;36.0.0" \
             "ndk;23.1.7779620"
 
-      - name: Accept any remaining licenses
-        run: |
           yes | "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
             --sdk_root="$HOME/android-sdk" --licenses
 
@@ -62,11 +60,11 @@ jobs:
             chmod +x "$HOME/.buildozer/android/platform/android-sdk/build-tools/36.0.0/aidl"
           fi
 
-      - name: Symlink sdkmanager for Buildozer compatibility
+      - name: Copy sdkmanager for Buildozer compatibility
         run: |
-          mkdir -p "$HOME/.buildozer/android/platform/android-sdk/tools/bin"
-          ln -sf "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
-            "$HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager"
+          mkdir -p "$HOME/.buildozer/android/platform/android-sdk/tools"
+          cp -r "$HOME/android-sdk/cmdline-tools/cmdline-tools" \
+                "$HOME/.buildozer/android/platform/android-sdk/tools"
 
       - name: Install Buildozer & Cython
         run: |
