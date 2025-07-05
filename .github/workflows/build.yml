@@ -20,17 +20,20 @@ jobs:
           path: ~/.buildozer ~/.buildozer_global
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
-      - name: Install system dependencies (Ubuntu 24.04 fix)
+      - name: Install system dependencies (Ubuntu 24.04 fix + Cython)
         run: |
           sudo apt update
           sudo apt install -y \
             git zip unzip openjdk-17-jdk python3-pip libffi-dev libssl-dev \
             libjpeg-dev libfreetype6-dev libncurses5-dev libtool pkg-config \
-            cmake zlib1g-dev autoconf automake
+            cmake zlib1g-dev autoconf automake cython
 
-          # Fix for missing libtinfo5 on Ubuntu 24.04
+          # Fix for Ubuntu 24.04 missing libtinfo5
           wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
           sudo apt install ./libtinfo5_6.3-2ubuntu0.1_amd64.deb
+
+          # Workaround in case cython binary is missing
+          sudo ln -sf "$(which cython3)" /usr/local/bin/cython || true
 
       - name: Install Android SDK & NDK
         run: |
@@ -46,7 +49,9 @@ jobs:
           yes | $HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
 
       - name: Install Buildozer
-        run: pip install --upgrade pip setuptools wheel buildozer
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install buildozer
 
       - name: Build APK (verbose)
         run: buildozer --verbose android debug
@@ -55,7 +60,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: buildozer-log-full
+          name: buildozer-log
           path: |
-            ./.buildozer/android/logs
             ./.buildozer/android/platform
