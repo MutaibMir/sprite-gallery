@@ -31,3 +31,6 @@ log_level = 2
 warn_on_root = 0
 android.accept_sdk_license = True
 android.skip_update = False
+
+# Fix ANT download failure on CI
+android.ant_path = /home/runner/.buildozer/android/platform/apache-ant-1.9.4
