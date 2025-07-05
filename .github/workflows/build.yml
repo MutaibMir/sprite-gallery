@@ -46,7 +46,7 @@ jobs:
       - name: Install Python + Buildozer deps
         run: |
           pip install --upgrade pip
-          pip install buildozer cython==0.29.33 pillow kivy
+          pip install buildozer cython==0.29.33 pillow "kivy[base]"==2.3.0 --no-build-isolation
 
       - name: Build APK with Buildozer
         run: |
