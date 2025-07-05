@@ -9,7 +9,7 @@ orientation = portrait
 fullscreen = 0
 log_level = 2
 main.py = main.py
-requirements = python3,kivy==2.3.0,pillow,cython==0.29.33
+requirements = python3,kivy==2.3.0,pillow,cython==0.29.33,pyjnius
 icon.filename = %(source.dir)s/icon.png
 presplash.filename = %(source.dir)s/presplash.png
 android.permissions = MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
