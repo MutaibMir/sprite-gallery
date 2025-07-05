@@ -52,7 +52,7 @@ jobs:
       - name: Accept any remaining licenses
         run: |
           yes | "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
-          --sdk_root="$HOME/android-sdk" --licenses
+            --sdk_root="$HOME/android-sdk" --licenses
 
       - name: Manual AIDL fix
         run: |
@@ -62,11 +62,11 @@ jobs:
             chmod +x "$HOME/.buildozer/android/platform/android-sdk/build-tools/36.0.0/aidl"
           fi
 
-      - name: Symlink sdkmanager to expected location
+      - name: Symlink sdkmanager for Buildozer compatibility
         run: |
           mkdir -p "$HOME/.buildozer/android/platform/android-sdk/tools/bin"
           ln -sf "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager" \
-                 "$HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager"
+            "$HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager"
 
       - name: Install Buildozer & Cython
         run: |
@@ -85,7 +85,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: buildozer-log
-          path: |
-            ./.buildozer/android/platform/**
-            ./.buildozer/android/**
-            ./.buildozer/**
+          path: ./.buildozer/**/*
